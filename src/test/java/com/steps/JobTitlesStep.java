@@ -1,179 +1,161 @@
 package com.steps;
 
-import java.util.List;
+ 
 
+import com.page.AdminPage;
+import com.page.JobTitlesPage;
+import com.page.LoginPage;
+import com.page.MenuPage;
 
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.PageFactory;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
+import utils.Hooks;
 
 public class JobTitlesStep {
 
-	@FindBy(xpath = "//h6[text()='Job Titles']")
-	WebElement pageHeader;
+	LoginPage loginObj;
+	MenuPage menuObj;
+	AdminPage adminObj;
+	JobTitlesPage jobTitleObj;
 
-	@FindBy(xpath = "//*[text()=' Add ']")
-	WebElement addBtn;
+	@Given("Admin User navigates to NTK Login page {string}")
+	public void navigateToNTK(String url) throws InterruptedException {
+		Hooks.setUp("firefox");
+		Hooks.driver.get(url);
 
-	@FindBy(xpath = "//*[text()=' Save ']")
-	WebElement saveBtn;
+		loginObj = new LoginPage(Hooks.driver);
+		menuObj = new MenuPage(Hooks.driver);
+		adminObj = new AdminPage(Hooks.driver);
+		jobTitleObj = new JobTitlesPage(Hooks.driver);
 
-	@FindBy(xpath = "//*[text()=' Cancel ']")
-	WebElement cancelBtn;
-
-	@FindBy(xpath = "(//input[@class='oxd-input oxd-input--active'])[2]")
-	WebElement jobTitleField;
-
-	@FindBy(xpath = "//*[@placeholder='Type description here']")
-	WebElement jobDescriptionField;
-
-	@FindBy(xpath = "//*[@placeholder='Add note']")
-	WebElement noteField;
-
-	@FindBy(xpath = "//*[text()='Successfully Saved']")
-	WebElement successMessage;
-
-	// *[contains(text(),'Successfully')]
-
-	@FindBy(xpath = "//*[text()='Successfully Updated']")
-	WebElement updateMessage;
-
-	@FindBy(xpath = "//*[text()='Successfully Deleted']")
-	WebElement deleteMessage;
-
-	@FindBy(xpath = "//*[text()='Already exists']")
-	WebElement alreadyExistMessage;
-
-	@FindBy(css = ".oxd-icon.bi-pencil-fill")
-	List<WebElement> editIconList;
-
-	@FindBy(css = ".oxd-icon.bi-trash")
-	List<WebElement> deleteIconList;
-
-	@FindBy(xpath = "//*[text()=' Yes, Delete ']")
-	WebElement yesDeleteBtn;
-
-	@FindBy(xpath = "//*[@style='flex: 2 1 0%;']/div")
-	List<WebElement> jobList;
-
-	public JobTitlesStep(WebDriver driver) {
-		PageFactory.initElements(driver, this);
 	}
 
-	public void clickAdd() {
-		addBtn.click();
+	@Given("Admin User provides credentials {string} {string}")
+	public void enterUserCredentials(String username, String password) {
+		loginObj.enterUsername(username);
+		loginObj.enterPassword(password);
 	}
 
-	public void clickSave() {
-		saveBtn.click();
+	@Given("Admin User clicks login button")
+	public void clickLoginBtn() {
+		loginObj.clickLogin();
 	}
 
-	public void clickCancel() {
-		cancelBtn.click();
+	@When("Admin User navigates to {string} page")
+	public void navigateToPage(String page) {
+		menuObj.navigateTo(page);
 	}
 
-	public void enterJobTitle(String title) {
-		jobTitleField.clear();
-		jobTitleField.sendKeys(title);
+	@When("Admin User selects {string} from {string} dropdown")
+	public void selectValueFromDropdown(String jobTitles, String job) throws InterruptedException {
+		Thread.sleep(1000);
+		adminObj.fromTopMenuNavigateTo(job, jobTitles);
 	}
 
-	public void enterJobDescription(String description) {
-		jobDescriptionField.clear();
-		jobDescriptionField.sendKeys(description);
+	@When("Admin User clicks add button")
+	public void clickAddBtn() {
+		jobTitleObj.clickAdd();
 	}
 
-	public void enterNotes(String notes) {
-		noteField.clear();
-		noteField.sendKeys(notes);
+	@When("Admin User provides Job Title field values {string} {string} {string}")
+	public void enterJobTitleFieldValues(String jobTitle, String jobDesc, String notes) throws InterruptedException {
+		jobTitleObj.enterJobTitle(jobTitle);
+ 
+		Thread.sleep(4000);
+		jobTitleObj.enterJobDescription(jobDesc);
+		 
+
+		jobTitleObj.enterNotes(notes);
+	 
+
 	}
 
-	public String getPageHeader() {
-		String text = pageHeader.getText();
-		return text;
+	@When("Admin User clicks save button")
+	public void clickSaveBtn() {
+		jobTitleObj.clickSave();
 	}
 
-	public String getSuccessMessage() {
-		String message = successMessage.getText();
-		return message;
-	}
+	@Then("System displays success message {string}")
+	public void verifySuccessMessage(String message) {
+		String actMessage = jobTitleObj.getSuccessMessage();
 
-	public String getAlreadyExistText() {
-		String text = alreadyExistMessage.getText();
-		return text;
-	}
-
-	public void editExistingJob(int index) {
-
-		for (int i = 0; i < editIconList.size(); i++) {
-
-			if (i == index) {
-				WebElement el = editIconList.get(0);
-				el.click();
-				break;
-			}
+		if (actMessage.equals(message)) {
+			System.out.println("Testcase passed:");
+		} else {
+			System.out.println("Testcase Failed:");
 		}
 
+		Hooks.tearDown();
 	}
+	
+	@Then("System displays update message {string}")
+	public void verifyUpdateMessage(String message) {
+		String actMessage = jobTitleObj.getUpdateMessage();
 
-	public void editExistingJob(String jobName) {
-
-		int index = getIndexOfJob(jobName);
-
-		for (int i = 0; i < editIconList.size(); i++) {
-
-			if (i == index) {
-				WebElement el = editIconList.get(0);
-				el.click();
-				break;
-			}
+		if (actMessage.equals(message)) {
+			System.out.println("Testcase passed:");
+		} else {
+			System.out.println("Testcase Failed:");
 		}
 
+		Hooks.tearDown();
 	}
+	
+	@Then("System displays delete message {string}")
+	public void verifyDeleteMessage(String message) {
+		String actMessage = jobTitleObj.getDeleteMessage();
 
-	public void deleteExistingJob(int index) {
-
-		for (int i = 0; i < deleteIconList.size(); i++) {
-
-			if (i == index) {
-				WebElement el = deleteIconList.get(0);
-				el.click();
-				break;
-			}
+		if (actMessage.equals(message)) {
+			System.out.println("Testcase passed:");
+		} else {
+			System.out.println("Testcase Failed:");
 		}
 
+		Hooks.tearDown();
 	}
 
-	public int getIndexOfJob(String jobName) {
-		int index = -1;
+	@Then("System displays error message under Job Titles field {string}")
+	public void verifyAlreadyExistsMessage(String message) {
 
-		for (int i = 0; i < jobList.size(); i++) {
+		String actMessage = jobTitleObj.getAlreadyExistText();
 
-			String name = jobList.get(0).getText();
-
-			System.out.println("************" + name + "**************");
-			if (jobName.equals(name)) {
-				System.out.println(name + "breaking Out" + i);
-				index = i;
-				break;
-			}
-
+		if (actMessage.equals(message)) {
+			System.out.println("Testcase passed:");
+		} else {
+			System.out.println("Testcase Failed:");
 		}
-		return index + 1;
+
+		Hooks.tearDown();
+	}
+	
+
+ 
+	
+	
+	
+	@Given("Admin User clicks edit icon {int}")
+	public void clickEditIcon(Integer index) {
+
+		jobTitleObj.editExistingJob(index);
 	}
 
-	public String getUpdateMessage() {
-		String message = updateMessage.getText();
-		return message;
-	}
+	
+	@Given("Admin User clicks delete icon {int}")
+	public void clickDeleteIcon(Integer index) {
 
-	public String getDeleteMessage() {
-		String message = deleteMessage.getText();
-		return message;
+		jobTitleObj.deleteExistingJob(index);
 	}
-
-	public void clickYesDelete() {
-		yesDeleteBtn.click();
+	
+	
+	@When("Admin User clicks Yes Delete button")
+	public void clickYesDeleteBtn() {
+		jobTitleObj.clickYesDelete();
 	}
-
+	
+	
+	@Given("Admin User clicks edit icon2 {string}")
+	public void admin_user_clicks_edit_icon2(String jobName) {
+	   jobTitleObj.editExistingJob(jobName);
+	}
 }
